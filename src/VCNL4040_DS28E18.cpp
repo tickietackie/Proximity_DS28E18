@@ -41,14 +41,11 @@ uint16_t VCNL4040_DS28E18::readCommand(uint8_t commandCode) {
     DS28E18 &ds = activeDS();
     seq.clear();
     
+    // I2C Write: Send register address
     seq.addStart();
     seq.addWriteByte(VCNL4040_ADDR, commandCode);
     
-    // Some VCNL4040 configurations prefer a STOP and small physical delay. Let's add it carefully.
-    // Sparkfun uses Repeated Start, but if DS28E18 is acting up on repeated starts, STOP works too.
-    seq.addStop();
-    seq.addDelay(0x00); // 1ms delay
-    
+    // I2C Read: Read 2 bytes (LSB first, then MSB) via Repeated Start
     seq.addStart();
     seq.addRead(VCNL4040_ADDR, 2);
     seq.addStop();
@@ -57,24 +54,20 @@ uint16_t VCNL4040_DS28E18::readCommand(uint8_t commandCode) {
     
     uint8_t result;
     if (!ds.runSequencer(0, seq.getLength(), result)) {
-        Serial.print("RunSeq FAIL cmd=0x"); Serial.print(commandCode, HEX);
-        Serial.print(" res=0x"); Serial.println(result, HEX);
         return 0;
     }
     
-    // Recalculate Offset for STOP + DELAY:
+    // Calculate data offset in response:
     // [0] Result (0xAA)
-    // [1] Start (0x02)
+    // [1] Start
     // [2-5] Write Pkt (0xE3, Len, Addr, Cmd)
-    // [6] Stop (0x03)
-    // [7-8] Delay (0xDD, 0x00)
-    // [9] Start (0x02)
-    // [10-12] Write Addr Read (0xE3, 0x01, Addr|1)
-    // [13-14] Read Op (0xD3, Len)
-    // [15-16] DATA (2 bytes) <--- Offset is 15
-    uint16_t dataOffset = 15;
+    // [6] Start
+    // [7-9] Write Addr Read (0xE3, 0x01, Addr|1)
+    // [10-11] Read Op (0xD3, Len)
+    // [12-13] DATA (2 bytes) <--- Offset is 12
+    uint16_t dataOffset = 12;
     
-    uint8_t rawData[30];
+    uint8_t rawData[20];
     uint16_t readLen = 0;
     if (!ds.readSequencer(0, rawData, seq.getLength(), readLen)) return 0;
     
