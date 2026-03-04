@@ -10,7 +10,6 @@ VL53L1X_DS28E18 vl53l1x(ds28e18);
 
 void setup()
 {
-
   Serial.begin(115200);
   while (!Serial)
     delay(10);
@@ -46,6 +45,10 @@ void setup()
   // Clear any POR flags
   ds28e18.resetDeviceStatus();
 
+  // Scan I2C bus (debug)
+  DS28E18_Debug = false;
+  // ds28e18.scanI2C();
+
   Serial.println("Initializing VL53L1X...");
 
   // Set a generous timeout for the slow 1-Wire->I2C bridge
@@ -77,16 +80,33 @@ void setup()
 void loop()
 {
   uint16_t distance = vl53l1x.read();
-
-  Serial.print("Distance: ");
-  Serial.print(distance);
-  Serial.print(" mm");
+  uint8_t status = vl53l1x.getRangeStatus();
 
   if (vl53l1x.timeoutOccurred())
   {
-    Serial.print(" (TIMEOUT)");
+    Serial.println("TIMEOUT");
+    return;
   }
 
-  Serial.println();
+  Serial.print("Status: ");
+  Serial.print(status);
+  Serial.print(" | ");
+
+  if (status == 0) {
+    Serial.print("Distance: ");
+    Serial.print(distance);
+    Serial.print(" mm");
+  } else if (status == VL53L1X_DS28E18::SignalFail || status == VL53L1X_DS28E18::OutOfBoundsFail) {
+    Serial.print("Distance: Out of Range (> 4000mm or no reflection)");
+  } else {
+    Serial.print("Distance: Invalid (Noise/Error)");
+  }
+  
+  Serial.print("\t| Sig: ");
+  Serial.print(vl53l1x.getSignalRate());
+
+  Serial.print(" | Amb: ");
+  Serial.println(vl53l1x.getAmbientRate());
+
   delay(100);
 }
