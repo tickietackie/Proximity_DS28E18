@@ -1,15 +1,15 @@
 {
-    "name": "VCNL4040_DS28E18",
+    "name": "Proximity_DS28E18",
     "version": "1.0.0",
-    "description": "Library for VCNL4040 proximity/ambient light sensor connected via DS28E18 1-Wire to I2C bridge",
-    "keywords": "VCNL4040, DS28E18, 1-Wire, I2C, proximity, ambient light, sensor",
+    "description": "Arduino library to access VCNL4040 and VL53L1X sensors over the DS28E18 1-Wire to I2C bridge",
+    "keywords": "VCNL4040, VL53L1X, DS28E18, 1-Wire, I2C, proximity, ToF, sensor",
     "repository": {
         "type": "git",
-        "url": "https://github.com/DanielSart/VCNL4040_DS28E18.git"
+        "url": "https://github.com/tickietackie/Proximity_DS28E18.git"
     },
     "authors": [
         {
-            "name": "Daniel Sart",
+            "name": "Kai Kuklok",
             "maintainer": true
         }
     ],
