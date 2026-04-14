@@ -11,10 +11,16 @@ VCNL4040_DS28E18 vcnl4040(ds28e18);
 void setup()
 {
   Serial.begin(115200);
-  while (!Serial)
+
+  // Wait for serial with timeout — on RP2040 (Mbed), while(!Serial) can
+  // hang if the USB port re-enumerates after upload. Use timeout instead.
+  unsigned long t0 = millis();
+  while (!Serial && (millis() - t0 < 3000))
     delay(10);
+  delay(200); // extra settle time for USB CDC
 
   Serial.println("--- DS28E18 + VCNL4040 Simple Example ---");
+  Serial.println("Initializing DS2482...");
 
   if (!ds2482.begin(&Wire, 0x18))
   {

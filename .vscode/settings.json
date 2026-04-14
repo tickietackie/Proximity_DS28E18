@@ -6,5 +6,8 @@
         "println",
         "raspberrypi",
         "VCNL"
-    ]
+    ],
+    "chat.tools.terminal.autoApprove": {
+        "pio": true
+    }
 }
